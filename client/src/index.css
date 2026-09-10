@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+
+  /* Pixel unit — every border, offset and step is a multiple of this. */
+  --pxu: 4px;
+  --pix-line: #1c1a20;
+  --pix-shadow: rgba(28, 26, 32, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* nav is 72–88px tall and sections are anchor targets */
+  scroll-padding-top: 104px;
+}
+
+body {
+  @apply bg-pix-paper text-pix-ink font-body antialiased;
+  font-feature-settings: 'ss01' on, 'ss02' on;
+}
+
+/* The /admin CMS keeps the original dark tool theme. */
+.admin-shell {
+  @apply bg-background text-text-primary font-body;
+  color-scheme: dark;
+}
+
+::selection {
+  background: #ffd7d9;
+  color: #1c1a20;
+}
+
+/* Chunky, square, pixel-appropriate scrollbar. */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+::-webkit-scrollbar-track {
+  background: #f7eacb;
+  border-left: 2px solid #e3cfa5;
+}
+::-webkit-scrollbar-thumb {
+  background: #1c1a20;
+  border: 3px solid #f7eacb;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ec3b43;
+}
+
+.admin-shell ::-webkit-scrollbar-track {
+  background: #080a09;
+  border: 0;
+}
+.admin-shell ::-webkit-scrollbar-thumb {
+  background: #1c201b;
+  border: 0;
+}
+
+@layer components {
+  /**
+   * PIXEL FRAME
+   * ───────────
+   * A real pixel-art frame has *notched* corners: the outline runs along each
+   * edge and stops one pixel short, so the corner pixel is missing. A CSS
+   * `border` can't do that — it mitres. Four directional box-shadows can:
+   * each one draws a full-width bar on one side only, leaving the corners bare.
+   *
+   * Width and colour are driven by custom properties so one class covers
+   * hairline chips (2px) through to hero windows (5px).
+   */
+  .pxl-edge {
+    --pxw: var(--pxu);
+    --pxc: var(--pix-line);
+    box-shadow:
+      0 calc(-1 * var(--pxw)) 0 0 var(--pxc),
+      0 var(--pxw) 0 0 var(--pxc),
+      calc(-1 * var(--pxw)) 0 0 0 var(--pxc),
+      var(--pxw) 0 0 0 var(--pxc);
+  }
+
+  /* Same notched frame, plus an inner 2px keyline — used for window bodies. */
+  .pxl-edge-lined {
+    --pxw: var(--pxu);
+    --pxc: var(--pix-line);
+    box-shadow:
+      0 calc(-1 * var(--pxw)) 0 0 var(--pxc),
+      0 var(--pxw) 0 0 var(--pxc),
+      calc(-1 * var(--pxw)) 0 0 0 var(--pxc),
+      var(--pxw) 0 0 0 var(--pxc),
+      inset 0 0 0 2px rgba(28, 26, 32, 0.09);
+  }
+
+  /* Sunken well: terminal strips, icon trays, form inputs. */
+  .pxl-well {
+    box-shadow:
+      inset 0 0 0 2px rgba(28, 26, 32, 0.16),
+      inset 0 2px 0 2px rgba(28, 26, 32, 0.06);
+  }
+
+  .pxl-w2 {
+    --pxw: 2px;
+  }
+  .pxl-w3 {
+    --pxw: 3px;
+  }
+  .pxl-w5 {
+    --pxw: 5px;
+  }
+
+  /* Edge colour overrides */
+  .pxl-c-red {
+    --pxc: #c2262d;
+  }
+  .pxl-c-shadow {
+    --pxc: var(--pix-shadow);
+  }
+}
+
+@layer utilities {
+  /* Sprites and any raster art must never be smoothed. */
+  .pixelated {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor;
+  }
+
+  /* Stepped text shadow — one pixel unit down-right, no blur. */
+  .pxl-text-shadow {
+    text-shadow: 3px 3px 0 rgba(28, 26, 32, 0.18);
+  }
+  .pxl-text-shadow-red {
+    text-shadow: 3px 3px 0 #9e1c22;
+  }
+  .pxl-text-hard {
+    text-shadow: 2px 2px 0 rgba(28, 26, 32, 0.14);
+  }
+
+  /* Small uppercase pixel label — the workhorse for window titles / eyebrows. */
+  .pxl-label {
+    @apply font-pixel uppercase tracking-pixel-wide;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Interactive lift, stepped rather than eased. */
+  .pxl-lift {
+    transition: transform 120ms steps(2, end);
+  }
+  .pxl-lift:hover {
+    transform: translateY(-4px);
+  }
+  .pxl-lift:active {
+    transform: translateY(0);
+  }
+}
+
+/**
+ * Keyboard focus.
+ *
+ * The pixel buttons/cards are wrapper elements whose visible surface is a child
+ * span, so the default UA outline lands in an unhelpful place and is nearly
+ * invisible on cream. A thick red ring with generous offset clears the 4px
+ * frame shadow and matches the design language.
+ */
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 3px solid #ec3b43;
+  outline-offset: 5px;
+}
+
+.admin-shell :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline-color: #b8bd72;
+  outline-offset: 2px;
+}
+
+/* Legacy helpers still referenced by the admin CMS. */
+.bg-app-grid {
+  background-image: theme('backgroundImage.grid');
+  background-size: theme('backgroundSize.grid');
+}
+
+.section-label {
+  @apply font-mono text-xs tracking-[0.25em] text-accent uppercase;
+}
+
+/* Respect users who don't want the scenery moving. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
