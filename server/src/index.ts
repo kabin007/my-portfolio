@@ -1,6 +1,7 @@
 /**
- * Local dev / self-hosted entrypoint. On Vercel the app is served by
- * api/[...path].mjs instead, and static files come from the CDN.
+ * Server entrypoint for local dev and for the Render web service: serves the
+ * API and the built client from one origin, so the client's relative /api
+ * calls resolve without CORS or a separate host.
  */
 import express from 'express'
 import path from 'path'

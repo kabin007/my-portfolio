@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: kabin-portfolio
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: JWT_SECRET
+        generateValue: true
+      # Persists site content across deploys and restarts, which Render's
+      # free-tier filesystem does not. Without it the app falls back to a
+      # local JSON file and admin edits are lost on every restart.
+      - key: BLOB_READ_WRITE_TOKEN
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false

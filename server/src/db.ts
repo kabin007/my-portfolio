@@ -6,7 +6,8 @@ import { seedData, type DbShape } from './seed.js'
 
 /**
  * Two storage drivers behind one interface:
- *  - Vercel Blob when BLOB_READ_WRITE_TOKEN is set (serverless, read-only FS)
+ *  - Vercel Blob when BLOB_READ_WRITE_TOKEN is set. It's just an HTTPS API,
+ *    so it works from any host and outlives Render's ephemeral filesystem.
  *  - a local JSON file otherwise, for `npm run dev`
  * Routes only ever touch readDb/writeDb/mutate, so they don't care which.
  */
@@ -64,10 +65,14 @@ function fileDriver(): Driver {
 
 function pickDriver(): Driver {
   if (process.env.BLOB_READ_WRITE_TOKEN) return blobDriver()
-  if (process.env.VERCEL) {
-    throw new Error(
-      'BLOB_READ_WRITE_TOKEN is not set. Create a Blob store in the Vercel ' +
-        'dashboard (Storage tab) and connect it to this project.'
+  if (process.env.RENDER || process.env.NODE_ENV === 'production') {
+    // Not fatal: the file driver works on Render, it just doesn't survive a
+    // deploy or a free-tier spin-down, so say so loudly rather than silently
+    // losing the admin's edits.
+    console.warn(
+      '[db] BLOB_READ_WRITE_TOKEN is not set — using local file storage. ' +
+        "Render's filesystem is wiped on every deploy and restart, so admin " +
+        'edits will not persist. Set the token to store content durably.'
     )
   }
   return fileDriver()
